@@ -1,4 +1,4 @@
-# Customer Churn Prediction Model – Vertex AI / SageMaker
+# Customer Churn Prediction Model – Vertex AI
 
 ## Table of Contents
 
@@ -16,7 +16,7 @@
 
 ---
 
-## 1. Executive Summary
+## 1. Churn Summary
 
 - **Project Overview:**  
   This repository contains the code, configuration, and documentation for a machine learning model to predict customer churn using Vertex AI (or SageMaker).  
