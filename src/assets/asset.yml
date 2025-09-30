@@ -8,7 +8,7 @@ description: "Data share/view or supported dataset storage for training the mode
 Enhanced Role of asset.yml in MLOps
 Instead of a static placeholder, this file could evolve into a centralized asset registry that supports reproducibility, traceability, and automation across environments.
 
-✅ Recommended Enhancements
+Recommended Enhancements
 Field	Purpose
 name	Canonical dataset name (e.g., customer_churn_v1)
 version	Semantic versioning (v1.0.0) to track dataset evolution
