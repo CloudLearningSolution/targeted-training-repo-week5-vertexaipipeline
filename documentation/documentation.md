@@ -97,7 +97,7 @@
 ## 6. Data Processing Pipeline
 
 - **Ingestion:**  
-  - Automated ETL using Dataflow (GCP) or Glue (AWS)
+  - Automated ETL using Dataflow (GCP)
 - **Feature Engineering:**  
   - Feature Store usage
   - Transformation scripts
@@ -177,7 +177,6 @@
   - IAM, encryption, compliance, audit
 - **References:**  
   - Vertex AI Documentation
-  - SageMaker Documentation
   - MLflow
   - Kubeflow
 
