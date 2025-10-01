@@ -1,0 +1,20 @@
+# Vertex AI CI/CD - Train Model (Dev & Prod)
+# ------------------------------------------
+# This workflow automates the ML pipeline for both development and production
+# using Google Cloud Vertex AI. It is triggered by pushes to 'main', pull
+# requests to 'main', or manual invocation. The workflow covers pipeline
+# compilation, model training, approval gating, and deployment.
+#
+# All comments and documentation lines are kept <= 100 characters for .flake8.
+
+# =============================================================================
+# Lab 5.4: Vertex AI Pipeline Component Architecture Exploration
+# =============================================================================
+# This CI/CD workflow demonstrates the orchestration of Vertex AI Pipeline
+# components through automated deployment. Understanding this workflow helps
+# identify how pipeline components are compiled, executed, and managed at scale.
+#
+# TODO: Lab 5.4.1 - Component Identification: CI/CD workflow orchestrates pipeline lifecycle
+# TODO: Lab 5.4.2 - Purpose Recognition: Automated pipeline deployment and execution
+# TODO: Lab 5.4.3 - Architecture Understanding: Pipeline compilation → execution → deployment flow
+# =============================================================================
