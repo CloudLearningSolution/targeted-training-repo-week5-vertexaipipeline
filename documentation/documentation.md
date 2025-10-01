@@ -1,126 +1,263 @@
+# Customer Churn Prediction Model – Vertex AI
+
+## Table of Contents
+
+1. Executive Summary
+2. Business Goal Identification
+3. ML Problem Framing and Validation
+4. Data Requirements and Feasibility
+5. ML Architecture Overview
+6. Data Processing Pipeline
+7. Model Development
+8. Model Explainability
+9. Deployment Strategy
+10. Monitoring & Observability
+11. Security & Compliance
+12. Appendix: Templates & References
+
 ---
-challenge:
-    module: Convert a notebook to production code
-    challenge: '0: Convert a notebook to production code'
+
+## 1. Executive Summary
+
+- **Project Overview:**  
+  This repository contains the code, configuration, and documentation for a machine learning model to predict customer churn using Google Cloud Vertex AI.
+- **Objectives:**  
+  - Reduce customer attrition by identifying at-risk customers.
+  - Enable targeted retention strategies.
+- **Business Value:**  
+  - Improved customer retention.
+  - Increased revenue and customer satisfaction.
+
 ---
 
-<style>
-.button  {
-  border: none;
-  color: white;
-  padding: 12px 28px;
-  background-color: #4285F4;
-  float: right;
-}
-</style>
+## 2. Business Goal Identification
 
-# Challenge 0: Convert a notebook to production code
+- **Business Problem:**  
+  Predict which customers are likely to churn in the next quarter.
+- **Stakeholders:**  
+  - Data Science Team
+  - MLOps Team
+  - Product/Business Owners
+  - IT & Security
+- **Success Metrics:**  
+  - Churn prediction accuracy
+  - Reduction in churn rate
+  - ROI from retention campaigns
 
-<button class="button" onclick="window.location.href='https://cloud.google.com/vertex-ai/docs/start/introduction-unified-platform';">Back to overview</button>
+---
 
-## Challenge scenario
+## 3. ML Problem Framing and Validation
 
-The first step to automate machine learning workflows is to convert a Jupyter notebook to production-ready code. When you store your code as scripts, it's easier to automate the code execution. You can parameterize scripts to easily reuse the code for retraining with Google Cloud Vertex AI.
+- **ML Task:**  
+  Binary classification (Churn/No Churn)
+- **Critical Features:**  
+  - Customer tenure
+  - Usage patterns
+  - Support interactions
+  - Demographics
+- **Validation Strategy:**  
+  - Cross-validation
+  - Holdout test set
+  - Business review of feature importance
 
-## Prerequisites
+---
 
-To complete this challenge, you'll need:
+## 4. Data Requirements and Feasibility
 
-- Access to a Google Cloud Platform (GCP) account with appropriate permissions.
-- A GitHub account.
-- Basic familiarity with Vertex AI and Google Cloud services.
-- Google Cloud SDK (gcloud) installed and configured.
+- **Data Sources:**  
+  - CRM database
+  - Usage logs
+  - Support tickets
+- **Data Quality Checks:**  
+  - Completeness
+  - Consistency
+  - Freshness
+- **Data Governance:**  
+  - Data lineage tracked via Vertex AI
+  - Compliance with GDPR/CCPA
 
-## Objectives
+---
 
-By completing this challenge, you'll learn how to:
+## 5. ML Architecture Overview
 
-- Clean nonessential code.
-- Convert your code to Python scripts compatible with Vertex AI.
-- Use functions in your scripts.
-- Use parameters in your scripts.
-- Implement experiment tracking with Vertex AI Experiments.
+- **Cloud Platform:**  
+  - Vertex AI (GCP)
+- **Pipeline Orchestration:**  
+  - Vertex AI Pipelines (Kubeflow Pipelines integration)
+- **Key Components:**  
+  - Data ingestion
+  - Feature engineering
+  - Model training
+  - Model evaluation
+  - Model registry
+  - Model deployment
 
-> **Important!**
-> Each challenge is designed to allow you to explore how to implement DevOps principles when working with machine learning models on Google Cloud Platform. Some instructions may be intentionally vague, inviting you to think about your own preferred approach. If for example, the instructions ask you to create a Vertex AI Workbench instance or enable Vertex AI APIs, it's up to you to explore and decide how you want to create it. To make it the best learning experience for you, it's up to you to make it as simple or as challenging as you want.
+---
 
-## Challenge Duration
+## 6. Data Processing Pipeline
 
-- **Estimated Time**: 30 minutes
+- **Ingestion:**  
+  - Automated ETL using Dataflow
+- **Feature Engineering:**  
+  - Vertex AI Feature Store usage
+  - Transformation scripts
+- **Data Validation:**  
+  - Great Expectations or built-in validation steps
+- **Data Versioning:**  
+  - DVC or cloud-native versioning
 
-## Instructions
+---
 
-To work through the challenges, you need **your own public repo** which includes the challenge files. Create a new public repo by navigating to [https://github.com/GoogleCloudPlatform/vertex-ai-samples](https://github.com/GoogleCloudPlatform/vertex-ai-samples) and fork or use as a template to create your own repo.
+## 7. Model Development
 
-In the **experimentation** folder, you'll find a Jupyter notebook that trains a classification model. The data used by the notebook is in the **experimentation/data** folder and contains a CSV file.
+- **Modeling Approach:**  
+  - Algorithms: XGBoost, Random Forest, Logistic Regression
+  - Hyperparameter tuning: Vertex AI Vizier
+- **Experiment Tracking:**  
+  - Vertex AI Experiments, MLflow (optional)
+- **Model Registry:**  
+  - Vertex AI Model Registry
 
-In the **src/model** folder you'll find a `train.py` script which already includes code converted from part of the notebook. It's up to you to complete it for Vertex AI compatibility.
+---
 
-- Go through the notebook to understand what the code does.
-- Convert the code under the **Split data** header and include it in the `train.py` script as a `split_data` function. Remember to:
-    - Remove nonessential code.
-    - Include the necessary code as a function.
-    - Include any necessary libraries at the top of the script.
-    - Ensure compatibility with Vertex AI training environment.
+## 8. Model Explainability
 
-<details>
-<summary>Hint</summary>
-<br/>
-The <code>split_data</code> function is already included in the main function. You only need to add the function itself with the required inputs and outputs underneath the comment <code>TO DO: add function to split data</code>. Make sure to handle Vertex AI's expected input/output paths using environment variables like <code>AIP_MODEL_DIR</code> and <code>AIP_TRAINING_DATA_URI</code>.
-</details>
+### 8.1 Purpose
 
-- Add experiment tracking so that every time you run the script, all parameters and metrics are tracked. Use Vertex AI Experiments to track your training runs, or alternatively, integrate with Vertex AI's managed MLflow to ensure the necessary model files are stored with the job run for easy deployment.
+Explainability is critical for:
+- Building trust with business stakeholders.
+- Ensuring regulatory compliance.
+- Diagnosing and improving model performance.
+- Supporting responsible AI practices.
 
-<details>
-<summary>Hint</summary>
-<br/>
-Vertex AI provides native experiment tracking capabilities through Vertex AI Experiments. You can also use the managed MLflow service on Vertex AI for experiment tracking. For Vertex AI Experiments, use the Vertex AI SDK to create and track experiments. For MLflow integration, you can use <code>mlflow.autolog()</code> with Vertex AI's managed MLflow tracking server. Enable experiment tracking in the main function under <code>TO DO: enable experiment tracking</code>.
-</details>
+### 8.2 Explainability Tools & Methods
 
-- Ensure your script is compatible with Vertex AI custom training jobs by:
-    - Using Vertex AI environment variables for input/output paths
-    - Saving the model to the correct output directory (using `AIP_MODEL_DIR`)
-    - Adding proper argument parsing for hyperparameters
-    - Integrating with Google Cloud Storage for data access
+- **Vertex AI Explainable AI:**  
+  - Integrated feature attribution for deployed models.
+  - Supports SHAP and integrated gradients for tabular, image, and text models.
+- **SHAP (SHapley Additive exPlanations):**  
+  - Used for local and global feature importance.
+- **LIME (Local Interpretable Model-agnostic Explanations):**  
+  - For local interpretability of individual predictions.
+- **Feature Importance Plots:**  
+  - Visualize which features most influence churn predictions.
 
-<details>
-<summary>Hint</summary>
-<br/>
-Vertex AI provides specific environment variables like <code>AIP_MODEL_DIR</code>, <code>AIP_TRAINING_DATA_URI</code>, and <code>AIP_VALIDATION_DATA_URI</code>. Use these to make your script portable across different Vertex AI environments. Also, implement argument parsing using <code>argparse</code> to handle hyperparameters passed from Vertex AI training jobs. Use the Google Cloud Storage client library to read training data from GCS buckets.
-</details>
+### 8.3 Documentation Requirements
 
-- Integrate with Google Cloud services:
-    - Use Google Cloud Storage for data storage and model artifacts
-    - Implement proper logging with Google Cloud Logging
-    - Consider using Vertex AI Pipelines for workflow orchestration
+- **Model Card:**  
+  - Purpose, intended use, limitations, and ethical considerations.
+- **Feature Attribution Reports:**  
+  - Automatically generated by Vertex AI for each model version.
+  - Include top features driving churn predictions.
+- **Bias and Fairness Analysis:**  
+  - Use Vertex AI’s built-in bias detection tools.
+  - Document any detected bias and mitigation steps.
+- **Example Notebooks:**  
+  - Provide python files demonstrating how to interpret model predictions using Vertex AI Explainable AI.
+- **Business Interpretation:**  
+  - Translate technical findings into actionable business insights (e.g., “High support ticket volume is a top churn driver”).
 
-<details>
-<summary>Hint</summary>
-<br/>
-Import the necessary Google Cloud libraries: <code>google-cloud-storage</code> for GCS operations, <code>google-cloud-logging</code> for structured logging, and <code>google-cloud-aiplatform</code> for Vertex AI integration. Set up proper authentication using Application Default Credentials (ADC) or service account keys.
-</details>
+### 8.4 Explainability Workflow
 
-## Success criteria
+1. **Enable Explainability in Vertex AI Model Deployment:**  
+   - Configure feature attribution during endpoint deployment.
+2. **Generate and Review Attribution Reports:**  
+   - Review global and local explanations after each model update.
+3. **Document Insights:**  
+   - Update the README and `/docs/explainability.md` with new findings.
+4. **Share with Stakeholders:**  
+   - Present explainability results in business reviews and model governance meetings.
+5. **Monitor for Drift:**  
+   - Use Vertex AI Model Monitoring to detect changes in feature importance over time.
 
-To complete this challenge successfully, you should be able to show:
+### 8.5 Example Outputs
 
-- A training script which includes a function to split the data and experiment tracking using Vertex AI Experiments or managed MLflow.
-- The script is compatible with Vertex AI custom training jobs (uses appropriate environment variables and paths).
-- Proper model serialization and saving to Google Cloud Storage.
-- Integration with Google Cloud services for logging and data management.
+- **Feature Attribution Table:**
 
-> **Note:**
-> If you've used a Vertex AI Workbench instance or Colab Enterprise for experimentation, remember to stop the instance when you're done to avoid unnecessary charges. Also, clean up any Google Cloud Storage buckets and Vertex AI resources you created during testing.
+| Feature                | Attribution Score | Business Interpretation            |
+  |------------------------|------------------|------------------------------------|
+  | Support Ticket Volume  | 0.35             | High support needs drive churn     |
+  | Tenure (months)        | -0.22            | Longer tenure reduces churn risk   |
+  | Usage Frequency        | -0.18            | Frequent users less likely to churn|
+  | Payment Issues         | 0.15             | Payment problems increase risk     |
 
-## Useful resources
+- **Visualization:**  
+  !Feature Importance Plot
 
-- [Vertex AI Custom Training Documentation](https://cloud.google.com/vertex-ai/docs/training/custom-training)
-- [Vertex AI Experiments for Experiment Tracking](https://cloud.google.com/vertex-ai/docs/experiments/intro-vertex-ai-experiments)
-- [Using MLflow with Vertex AI](https://cloud.google.com/vertex-ai/docs/experiments/vertex-ai-mlflow)
-- [Vertex AI Workbench User Guide](https://cloud.google.com/vertex-ai/docs/workbench)
-- [Google Cloud Storage Client Libraries](https://cloud.google.com/storage/docs/reference/libraries)
-- [Vertex AI Python SDK Documentation](https://cloud.google.com/python/docs/reference/aiplatform/latest)
-- [Vertex AI Pipelines](https://cloud.google.com/vertex-ai/docs/pipelines/introduction)
-- [Google Cloud ML Engineering Best Practices](https://cloud.google.com/architecture/ml-on-gcp-best-practices)
+---
 
-<button class="button" onclick="window.location.href='01-vertex-ai-job';">Continue with challenge 1</button>
+## 9. Deployment Strategy
+
+- **Deployment Patterns:**  
+  - Blue/Green or Canary deployments
+- **Endpoints:**  
+  - Real-time prediction endpoint
+  - Batch prediction jobs
+- **CI/CD Integration:**  
+  - Cloud Build / GitHub Actions
+- **Rollback Procedures:**  
+  - Automated rollback on failure
+
+---
+
+## 10. Monitoring & Observability
+
+- **Model Monitoring:**  
+  - Vertex AI Model Monitoring for data drift, prediction drift, and feature attribution drift.
+- **Logging & Audit:**  
+  - Centralized logging (Cloud Logging)
+  - Audit trails for model predictions
+
+---
+
+## 11. Security & Compliance
+
+- **Access Control:**  
+  - IAM roles and policies (least privilege)
+  - Service accounts for pipelines
+- **Data Encryption:**  
+  - At rest and in transit (KMS, CMEK)
+- **Compliance:**  
+  - GDPR, CCPA, HIPAA (as applicable)
+- **Vulnerability Scanning:**  
+  - Container/image scanning
+- **Audit Logging:**  
+  - Cloud Audit Logs
+
+---
+
+## 12. Appendix: Templates & References
+
+- **Model Intake Form:**  
+  - Project Name, Owner, Stakeholders, Start/End Dates
+  - Model details: version, description, dependencies
+- **Data Migration Table:**  
+  - Source/Destination, Volume, Transfer Method, Validation
+- **Security Checklist:**  
+  - IAM, encryption, compliance, audit
+- **References:**  
+  - Vertex AI Documentation
+  - MLflow
+  - Kubeflow
+
+---
+
+## How to Use This Repository
+
+1. **Clone the repo and review the Business Goal Identification section.**
+2. **Follow the Data Processing Pipeline and Model Development steps.**
+3. **Document all changes and experiments using the templates provided.**
+4. **Ensure all code and configuration changes are peer-reviewed and pass CI/CD checks.**
+5. **Update the Model Explainability section with each model release.**
+6. **Review the Security & Compliance checklist before production deployment.**
+
+---
+
+## Contribution Guidelines
+
+- All contributions must be documented and reviewed.
+- Use feature branches for experiments and enhancements.
+- Update the README and relevant documentation with each major change.
+- Ensure compliance with security and data governance policies.
+
+---
