@@ -71,6 +71,13 @@ class ModelDeploymentManager:
         # TODO: Lab 5.4.1 - Component Identification: aiplatform.init() configures Vertex AI SDK
         # TODO: Lab 5.4.3 - Architecture Understanding: SDK initialization enables service integration
         aiplatform.init(project=project_id, location=region)
+        
+        # TODO: Lab 5.6.5 — Observability: metrics, logging, and dashboard links
+        # INSPECT: logging.basicConfig() sets up deployment script logging.
+        # NOTE: This logging configuration applies to the entire deployment process.
+        # OBSERVATION: Uses timestamp, level, and message format for structured logging.
+        # DELIVERABLE: Document this logging pattern in observability.md.
+        
         logging.basicConfig(
             level=logging.INFO,
             format='%(asctime)s - %(levelname)s - %(message)s'
@@ -91,6 +98,11 @@ class ModelDeploymentManager:
         Returns:
             aiplatform.Model: Latest registered model instance
         """
+        # TODO: Lab 5.6.5 — Observability: metrics, logging, and dashboard links
+        # INSPECT: Logging pattern for model search operations.
+        # OBSERVATION: Logs model search start for debugging and audit trail.
+        # TASK: Count all self.logger calls in this method (there are 2).
+        
         self.logger.info(f"Searching for model: {model_display_name}")
         # TODO: Lab 5.4.1 - Component Identification: Model.list() queries Model Registry
         # TODO: Lab 5.4.2 - Purpose Recognition: Retrieves models registered by pipeline components
@@ -103,6 +115,13 @@ class ModelDeploymentManager:
             )
         # TODO: Lab 5.4.2 - Purpose Recognition: Latest model selection for production deployment
         latest_model = max(models, key=lambda m: m.create_time)
+        
+        # TODO: Lab 5.6.5 — Observability: metrics, logging, and dashboard links
+        # INSPECT: Logging pattern for model discovery success.
+        # OBSERVATION: Logs model details (display_name, resource_name, create_time).
+        # PURPOSE: Provides audit trail of which model version was selected for deployment.
+        # DELIVERABLE: Document this observability pattern in observability.md.
+        
         self.logger.info(
             f"Found latest model: {latest_model.display_name} "
             f"(Resource: {latest_model.resource_name}, "
@@ -124,6 +143,11 @@ class ModelDeploymentManager:
         Returns:
             aiplatform.Endpoint: Endpoint instance for model deployment
         """
+        # TODO: Lab 5.6.5 — Observability: metrics, logging, and dashboard links
+        # INSPECT: Logging for endpoint lookup operations.
+        # OBSERVATION: Logs endpoint search start.
+        # TASK: Count all self.logger calls in this method (there are 3).
+        
         self.logger.info(f"Looking for existing endpoint: {endpoint_display_name}")
         # TODO: Lab 5.4.1 - Component Identification: Endpoint.list() queries existing endpoints
         # TODO: Lab 5.4.2 - Purpose Recognition: Reuse existing endpoints when available
@@ -132,22 +156,46 @@ class ModelDeploymentManager:
         )
         if existing_endpoints:
             endpoint = existing_endpoints[0]
+            
+            # TODO: Lab 5.6.5 — Observability: metrics, logging, and dashboard links
+            # INSPECT: Logging for existing endpoint reuse.
+            # OBSERVATION: Logs endpoint resource_name for tracking.
+            # PURPOSE: Audit trail showing endpoint was reused (not newly created).
+            
             self.logger.info(f"Using existing endpoint: {endpoint.resource_name}")
             return endpoint
         # TODO: Lab 5.4.1 - Component Identification: Endpoint.create() provisions new serving endpoint
         # TODO: Lab 5.4.2 - Purpose Recognition: New endpoints for first-time deployments
         # TODO: Lab 5.4.3 - Architecture Understanding: Endpoints are managed serving infrastructure
+        
+        # TODO: Lab 5.6.5 — Observability: metrics, logging, and dashboard links
+        # INSPECT: Logging for new endpoint creation.
+        # OBSERVATION: Logs when creating NEW endpoint (vs reusing existing).
+        
         self.logger.info(f"Creating new endpoint: {endpoint_display_name}")
         endpoint = aiplatform.Endpoint.create(
             display_name=endpoint_display_name,
             description=f"Endpoint for {endpoint_display_name} diabetes prediction model",
             # TODO: Lab 5.4.1 - Component Identification: Labels enable endpoint organization and tracking
+            
+            # TODO: Lab 5.6.5 — Observability: metrics, logging, and dashboard links
+            # INSPECT: Labels for endpoint categorization and filtering.
+            # OBSERVATION: Labels enable monitoring dashboard filtering and cost attribution.
+            # LABELS: model_type, environment, managed_by.
+            # PURPOSE: Enables filtering in Vertex AI console and cost tracking.
+            # DELIVERABLE: Document label usage in observability.md.
+            
             labels={
                 "model_type": "diabetes_classifier",
                 "environment": "production",
                 "managed_by": "vertex_ai_pipeline"
             }
         )
+        
+        # TODO: Lab 5.6.5 — Observability: metrics, logging, and dashboard links
+        # INSPECT: Logging for successful endpoint creation.
+        # OBSERVATION: Logs endpoint resource_name for tracking and monitoring.
+        
         self.logger.info(f"Created endpoint: {endpoint.resource_name}")
         return endpoint
 
@@ -180,6 +228,11 @@ class ModelDeploymentManager:
         Returns:
             Dict: Deployment configuration details
         """
+        # TODO: Lab 5.6.5 — Observability: metrics, logging, and dashboard links
+        # INSPECT: Logging for deployment initiation.
+        # OBSERVATION: Logs both model and endpoint names for audit trail.
+        # TASK: Count all self.logger calls in this method (there are 2 or 3 depending on warnings).
+        
         self.logger.info(f"Deploying model {model.display_name} to endpoint {endpoint.display_name}")
         # TODO: Lab 5.4.1 - Component Identification: endpoint.deploy() creates model deployment
         # TODO: Lab 5.4.2 - Purpose Recognition: Deployment makes pipeline models available for inference
@@ -199,6 +252,12 @@ class ModelDeploymentManager:
             traffic_percentage=traffic_percentage,
             sync=True,
         )
+        
+        # TODO: Lab 5.6.5 — Observability: metrics, logging, and dashboard links
+        # INSPECT: Logging for successful deployment completion.
+        # OBSERVATION: Confirms deployment succeeded before returning details.
+        # PURPOSE: Clear success signal in logs for monitoring and alerting.
+        
         self.logger.info("Model deployment completed successfully")
         deployed_model_id = None
         try:
@@ -208,9 +267,21 @@ class ModelDeploymentManager:
                     deployed_model_id = deployed_model.id
                     break
         except Exception as e:
+            # TODO: Lab 5.6.5 — Observability: metrics, logging, and dashboard links
+            # INSPECT: Warning logging for non-critical errors.
+            # OBSERVATION: Uses self.logger.warning() for recoverable issues.
+            # PURPOSE: Logs issue but doesn't fail deployment if model ID can't be retrieved.
+            
             self.logger.warning(f"Could not retrieve deployed model ID: {e}")
             deployed_model_id = "unknown"
         # TODO: Lab 5.4.1 - Component Identification: Deployment metadata for tracking
+        
+        # TODO: Lab 5.6.5 — Observability: metrics, logging, and dashboard links
+        # INSPECT: Deployment metadata returned for monitoring and tracking.
+        # OBSERVATION: Returns structured dict with all deployment configuration.
+        # PURPOSE: Enables monitoring dashboards and deployment tracking.
+        # DELIVERABLE: Document this metadata structure in observability.md.
+        
         deployment_details = {
             "endpoint_id": endpoint.name,
             "deployed_model_id": deployed_model_id,
@@ -240,6 +311,11 @@ class ModelDeploymentManager:
         Returns:
             Tuple[List, bool]: Predictions and success status
         """
+        # TODO: Lab 5.6.5 — Observability: metrics, logging, and dashboard links
+        # INSPECT: Logging for endpoint testing operations.
+        # OBSERVATION: Logs test start for deployment validation tracking.
+        # TASK: Count all self.logger calls in this method (there are 4-5).
+        
         self.logger.info("Testing endpoint with sample diabetes data...")
         try:
             # TODO: Lab 5.4.1 - Component Identification: endpoint.predict() invokes deployed model
@@ -247,14 +323,34 @@ class ModelDeploymentManager:
             # TODO: Lab 5.4.3 - Architecture Understanding: Prediction verifies complete ML architecture
             predictions = endpoint.predict(instances=test_instances)
             if predictions and predictions.predictions:
+                # TODO: Lab 5.6.5 — Observability: metrics, logging, and dashboard links
+                # INSPECT: Logging for successful endpoint test.
+                # OBSERVATION: Logs success message and sample predictions.
+                # PURPOSE: Validates deployment is functional and returns expected results.
+                
                 self.logger.info("Endpoint responding correctly")
                 for i, prediction in enumerate(predictions.predictions[:3]):
+                    # TODO: Lab 5.6.5 — Observability: metrics, logging, and dashboard links
+                    # INSPECT: Logging pattern for sample predictions.
+                    # OBSERVATION: Logs first 3 predictions for spot-checking results.
+                    # PURPOSE: Quick validation that predictions look reasonable.
+                    
                     self.logger.info(f"Sample prediction {i+1}: {prediction}")
                 return predictions.predictions, True
             else:
+                # TODO: Lab 5.6.5 — Observability: metrics, logging, and dashboard links
+                # INSPECT: Error logging for empty prediction response.
+                # OBSERVATION: Uses self.logger.error() for test failures.
+                
                 self.logger.error("Endpoint returned empty predictions")
                 return [], False
         except Exception as e:
+            # TODO: Lab 5.6.5 — Observability: metrics, logging, and dashboard links
+            # INSPECT: Exception logging for endpoint test failures.
+            # OBSERVATION: Logs exception details for debugging.
+            # PURPOSE: Critical for diagnosing deployment issues.
+            # DELIVERABLE: Document error logging pattern in observability.md.
+            
             self.logger.error(f"Endpoint test failed: {str(e)}")
             return [], False
 
@@ -271,9 +367,22 @@ class ModelDeploymentManager:
         Returns:
             Dict: Comprehensive endpoint information
         """
+        # TODO: Lab 5.6.5 — Observability: metrics, logging, and dashboard links
+        # INSPECT: Logging for endpoint information retrieval.
+        # OBSERVATION: Logs endpoint inspection operation.
+        # TASK: Count all self.logger calls in this method (there is 1).
+        
         self.logger.info(f"Retrieving endpoint information: {endpoint.display_name}")
         # TODO: Lab 5.4.1 - Component Identification: Endpoint metadata structure
         # TODO: Lab 5.4.2 - Purpose Recognition: Metadata enables monitoring and management
+        
+        # TODO: Lab 5.6.5 — Observability: metrics, logging, and dashboard links
+        # INSPECT: Endpoint metadata structure for monitoring.
+        # OBSERVATION: Returns structured dict with endpoint and deployment details.
+        # PURPOSE: Enables monitoring dashboards and operational visibility.
+        # FIELDS: endpoint_name, endpoint_id, create_time, region, project_id, deployed_models.
+        # DELIVERABLE: Document this metadata structure in observability.md for monitoring setup.
+        
         endpoint_info = {
             "endpoint_name": endpoint.display_name,
             "endpoint_id": endpoint.name,
@@ -283,6 +392,13 @@ class ModelDeploymentManager:
             "deployed_models": []
         }
         # TODO: Lab 5.4.1 - Component Identification: Deployed model details for tracking
+        
+        # TODO: Lab 5.6.5 — Observability: metrics, logging, and dashboard links
+        # INSPECT: Deployed model metadata collection.
+        # OBSERVATION: Iterates through all deployed models on endpoint.
+        # PURPOSE: Captures configuration for monitoring and capacity planning.
+        # METADATA COLLECTED: display_name, model_id, machine_type, min/max_replicas, deployed_model_id.
+        
         for deployed_model in endpoint._gca_resource.deployed_models:
             model_info = {
                 "model_display_name": deployed_model.display_name,
@@ -416,6 +532,12 @@ def main():
             max_replica_count=args.max_replicas
         )
 
+        # TODO: Lab 5.6.5 — Observability: metrics, logging, and dashboard links
+        # INSPECT: Console output for deployment summary.
+        # OBSERVATION: Prints structured deployment information to stdout.
+        # PURPOSE: Provides immediate feedback on deployment success and configuration.
+        # DELIVERABLE: Note this output pattern in observability.md.
+        
         print("\n" + "=" * 60)
         print("MODEL DEPLOYMENT COMPLETED SUCCESSFULLY")
         print("=" * 60)
@@ -427,6 +549,13 @@ def main():
 
         # TODO: Lab 5.4.1 - Component Identification: Optional endpoint testing
         # TODO: Lab 5.4.2 - Purpose Recognition: Validates complete pipeline-to-serving flow
+        
+        # TODO: Lab 5.6.5 — Observability: metrics, logging, and dashboard links
+        # INSPECT: Optional endpoint testing for post-deployment validation.
+        # OBSERVATION: --test-endpoint flag enables automatic testing after deployment.
+        # PURPOSE: Validates deployment is functional before declaring success.
+        # DELIVERABLE: Document this validation pattern in observability.md.
+        
         if args.test_endpoint:
             print("\n" + "-" * 40)
             print("TESTING ENDPOINT")
@@ -444,6 +573,12 @@ def main():
                 print("Endpoint test failed")
 
         # TODO: Lab 5.4.1 - Component Identification: Endpoint information retrieval
+        
+        # TODO: Lab 5.6.5 — Observability: metrics, logging, and dashboard links
+        # INSPECT: Endpoint information display for operational visibility.
+        # OBSERVATION: Prints endpoint resource name and deployed model count.
+        # PURPOSE: Provides operators with essential endpoint details.
+        
         endpoint_info = deployment_manager.get_endpoint_info(endpoint)
         print("\n" + "-" * 40)
         print("ENDPOINT INFORMATION")
@@ -451,6 +586,18 @@ def main():
         print(f"Endpoint URL: {endpoint.resource_name}")
         print(f"Total Deployed Models: {len(endpoint_info['deployed_models'])}")
 
+        # TODO: Lab 5.6.5 — Observability: metrics, logging, and dashboard links
+        # INSPECT: Post-deployment guidance for monitoring and operations.
+        # OBSERVATION: Prints actionable next steps for operators.
+        # PURPOSE: Guides users to monitoring tools and best practices.
+        # KEY OBSERVABILITY RECOMMENDATIONS:
+        # 1. Monitor endpoint performance in Vertex AI console
+        # 2. Set up alerting for endpoint health and latency
+        # 3. Configure auto-scaling based on traffic patterns
+        # 4. Implement A/B testing for model versions
+        # 5. Use endpoint for predictions
+        # DELIVERABLE: Document these monitoring recommendations in observability.md.
+        
         print("\n" + "-" * 40)
         print("NEXT STEPS")
         print("-" * 40)
@@ -500,5 +647,265 @@ if __name__ == "__main__":
     # TODO: Lab 5.4.3 - Architecture Understanding: This script demonstrates
     #       how pipeline components integrate with serving infrastructure to
     #       create a complete, production-ready ML system
+    
+    # TODO: Lab 5.6.5 — Observability: metrics, logging, and dashboard links
+    # OBSERVABILITY SUMMARY FOR DEPLOY_MODEL.PY:
+    # ==========================================
+    #
+    # LOGGING CALLS (ALL self.logger calls):
+    # -------------------------------------
+    # find_latest_model():
+    #   - Searching for model: {model_display_name}
+    #   - Found latest model: {display_name} (Resource: {resource_name}, Created: {create_time})
+    #
+    # create_or_get_endpoint():
+    #   - Looking for existing endpoint: {endpoint_display_name}
+    #   - Using existing endpoint: {resource_name} (if exists)
+    #   - Creating new endpoint: {endpoint_display_name} (if new)
+    #   - Created endpoint: {resource_name} (if new)
+    #
+    # deploy_model_to_endpoint():
+    #   - Deploying model {model.display_name} to endpoint {endpoint.display_name}
+    #   - Model deployment completed successfully
+    #   - Could not retrieve deployed model ID: {e} (warning, if error)
+    #
+    # test_endpoint_prediction():
+    #   - Testing endpoint with sample diabetes data...
+    #   - Endpoint responding correctly (if success)
+    #   - Sample prediction {i+1}: {prediction} (for each sample)
+    #   - Endpoint returned empty predictions (if empty)
+    #   - Endpoint test failed: {str(e)} (if exception)
+    #
+    # get_endpoint_info():
+    #   - Retrieving endpoint information: {endpoint.display_name}
+    #
+    # TOTAL LOGGING CALLS: Approximately 15-17 across all methods
+    #
+    # LABELS FOR MONITORING AND FILTERING:
+    # ------------------------------------
+    # Endpoint labels (create_or_get_endpoint):
+    #   - model_type: "diabetes_classifier"
+    #   - environment: "production"
+    #   - managed_by: "vertex_ai_pipeline"
+    #
+    # PURPOSE: Enable filtering in Vertex AI console and cost attribution
+    #
+    # METADATA STRUCTURES FOR MONITORING:
+    # ----------------------------------
+    # deployment_details (deploy_model_to_endpoint return value):
+    #   - endpoint_id: Endpoint resource name
+    #   - deployed_model_id: Deployed model ID
+    #   - machine_type: Machine type used
+    #   - replica_count: Min-max replica range
+    #   - traffic_percentage: Traffic allocation
+    #   - status: "deployed"
+    #
+    # endpoint_info (get_endpoint_info return value):
+    #   - endpoint_name: Display name
+    #   - endpoint_id: Resource name
+    #   - create_time: Creation timestamp
+    #   - region: GCP region
+    #   - project_id: GCP project
+    #   - deployed_models: List of deployed model details
+    #     - model_display_name
+    #     - model_id
+    #     - machine_type
+    #     - min_replicas
+    #     - max_replicas
+    #     - deployed_model_id
+    #
+    # CONSOLE OUTPUT (stdout):
+    # -----------------------
+    # - MODEL DEPLOYMENT COMPLETED SUCCESSFULLY banner
+    # - Model display name
+    # - Endpoint display name
+    # - Machine type
+    # - Replica range
+    # - Traffic allocation percentage
+    # - TESTING ENDPOINT section (if --test-endpoint flag)
+    # - Test pass/fail status
+    # - Sample predictions (first 2)
+    # - ENDPOINT INFORMATION section
+    # - Endpoint URL (resource name)
+    # - Total deployed models count
+    # - NEXT STEPS section with 5 monitoring recommendations
+    #
+    # WHERE TO FIND DEPLOYMENT LOGS:
+    # =============================
+    # - Script execution logs: stdout/stderr (captured by CI/CD or terminal)
+    # - Vertex AI Model Registry: Model metadata and lineage
+    # - Vertex AI Endpoints console: Endpoint monitoring dashboard
+    # - Cloud Logging: Filter by project_id and deploy_model.py
+    #
+    # POST-DEPLOYMENT OBSERVABILITY HOOKS:
+    # ===================================
+    # 1. Endpoint resource_name printed for direct console access
+    # 2. Deployment details returned as structured dict
+    # 3. Optional endpoint testing validates functionality
+    # 4. Endpoint info retrieval for operational visibility
+    # 5. "Next Steps" guidance points to monitoring tools
+    #
+    # MONITORING RECOMMENDATIONS (from script output):
+    # ===============================================
+    # 1. Monitor endpoint performance in Vertex AI console
+    #    - Latency metrics (p50, p95, p99)
+    #    - Request rate and throughput
+    #    - Error rate and status codes
+    #    - Resource utilization (CPU, memory)
+    #
+    # 2. Set up alerting for endpoint health and latency
+    #    - Use Cloud Monitoring for alerts
+    #    - Alert on error rate > threshold
+    #    - Alert on latency > SLA
+    #    - Alert on replica count changes
+    #
+    # 3. Configure auto-scaling based on traffic patterns
+    #    - Adjust min/max replica counts
+    #    - Set appropriate machine types
+    #    - Monitor scaling events
+    #
+    # 4. Implement A/B testing for model versions
+    #    - Deploy multiple models to same endpoint
+    #    - Split traffic percentage
+    #    - Monitor performance differences
+    #    - Gradually shift traffic to better model
+    #
+    # 5. Use endpoint for predictions
+    #    - Endpoint resource name provided
+    #    - Use Vertex AI Prediction API
+    #    - Monitor prediction latency and quality
+    #
+    # OBSERVABILITY GAPS (NOT CURRENTLY IMPLEMENTED):
+    # ==============================================
+    # - No custom metrics logging (e.g., deployment duration)
+    # - No integration with external monitoring systems (Prometheus, Datadog)
+    # - No structured logging (JSON format for machine parsing)
+    # - No deployment event tracking (success/failure metrics)
+    # - No automated health checks after deployment
+    # - No rollback capabilities on deployment failure
+    #
+    # OBSERVABILITY BEST PRACTICES DEMONSTRATED:
+    # =========================================
+    # ✓ Comprehensive logging at each step
+    # ✓ Structured metadata returned for monitoring
+    # ✓ Labels for filtering and cost attribution
+    # ✓ Optional testing for validation
+    # ✓ Clear success/failure indicators
+    # ✓ Endpoint resource names for console access
+    # ✓ Guidance on monitoring setup
+    #
+    # VERTEX AI CONSOLE ACCESS FOR MONITORING:
+    # ========================================
+    # 1. Model Registry:
+    #    - Navigate to: Vertex AI → Model Registry
+    #    - View: Registered models and versions
+    #    - Monitor: Model lineage and metadata
+    #
+    # 2. Endpoints:
+    #    - Navigate to: Vertex AI → Endpoints
+    #    - View: All deployed endpoints
+    #    - Monitor: Request metrics, latency, errors
+    #    - Filter: Use labels (environment: production)
+    #
+    # 3. Endpoint Details (specific endpoint):
+    #    - Click endpoint name from list
+    #    - View: Deployed models on endpoint
+    #    - Monitor: Traffic split, replica count
+    #    - Access: Prediction API details
+    #    - Logs: Click "View logs" for Cloud Logging
+    #
+    # 4. Deployed Model Details:
+    #    - Click deployed model within endpoint
+    #    - View: Model version, create time
+    #    - Monitor: Individual model metrics
+    #    - Test: Send test predictions
+    #
+    # 5. Cloud Logging (detailed logs):
+    #    - Navigate to: Cloud Logging
+    #    - Filter by: resource.type="aiplatform.googleapis.com/Endpoint"
+    #    - Filter by: resource.labels.endpoint_id="<endpoint_id>"
+    #    - View: Request logs, error logs, system logs
+    #
+    # 6. Cloud Monitoring (metrics and alerts):
+    #    - Navigate to: Cloud Monitoring → Metrics Explorer
+    #    - Metric: aiplatform.googleapis.com/prediction/online/*
+    #    - View: Latency, error rate, request count
+    #    - Create: Alerts based on metric thresholds
+    #
+    # INTEGRATION WITH PIPELINE OBSERVABILITY:
+    # ========================================
+    # Pipeline Phase          | Observability Tool
+    # -----------------------|------------------------------------------
+    # Training                | Pipeline component logs (Vertex AI)
+    # Evaluation              | Metrics logged (accuracy, thresholds)
+    # Registration            | Model Registry (version tracking)
+    # Deployment (this script)| Deployment logs (stdout, Cloud Logging)
+    # Serving                 | Endpoint monitoring (Vertex AI console)
+    # Inference               | Prediction logs (Cloud Logging)
+    #
+    # COMPLETE OBSERVABILITY FLOW:
+    # ===========================
+    # 1. Pipeline Execution:
+    #    - View in: Vertex AI Pipelines console
+    #    - Monitor: Component status, execution time
+    #    - Logs: Click component for logs
+    #
+    # 2. Model Registration:
+    #    - View in: Model Registry
+    #    - Monitor: Model versions, lineage
+    #    - Metadata: Training accuracy, parameters
+    #
+    # 3. Model Deployment (THIS SCRIPT):
+    #    - View in: Script stdout/logs
+    #    - Monitor: Deployment success/failure
+    #    - Validate: Optional endpoint testing
+    #
+    # 4. Endpoint Serving:
+    #    - View in: Endpoints console
+    #    - Monitor: Latency, throughput, errors
+    #    - Alert: Cloud Monitoring alerts
+    #
+    # 5. Prediction Monitoring:
+    #    - View in: Cloud Logging (prediction logs)
+    #    - Monitor: Prediction quality, drift
+    #    - Analyze: Request/response patterns
+    #
+    # DELIVERABLE CHECKLIST FOR observability.md:
+    # ===========================================
+    # □ List all logging calls in deploy_model.py (15-17 total)
+    # □ Document endpoint labels and their purposes
+    # □ Document deployment_details metadata structure
+    # □ Document endpoint_info metadata structure
+    # □ List where to find deployment logs (4 locations)
+    # □ Document post-deployment observability hooks (5 items)
+    # □ List monitoring recommendations from script output (5 items)
+    # □ Document Vertex AI console access paths (6 sections)
+    # □ Document integration with pipeline observability
+    # □ Note observability gaps and potential improvements
+    #
+    # COMPARISON: PIPELINE vs DEPLOYMENT OBSERVABILITY:
+    # =================================================
+    # Pipeline Components (train_model_op, evaluate_model_op):
+    #   - Logging: Component-level logs with [DEV]/[PROD] prefix
+    #   - Metrics: metrics.log_metric() for accuracy tracking
+    #   - Location: Vertex AI Pipelines console, Cloud Logging
+    #
+    # Deployment Script (deploy_model.py):
+    #   - Logging: Deployment operation logs with timestamps
+    #   - Metadata: Deployment details dict, endpoint info dict
+    #   - Location: Script stdout, Cloud Logging, Vertex AI Endpoints console
+    #
+    # Both Provide:
+    #   - Comprehensive logging at each step
+    #   - Clear success/failure indicators
+    #   - Resource names for console access
+    #   - Structured metadata for monitoring
+    #
+    # Key Difference:
+    #   - Pipeline: Logs appear in pipeline execution context
+    #   - Deployment: Logs appear in deployment script context
+    #   - Pipeline: Metrics logged to Vertex AI Experiments
+    #   - Deployment: Endpoint metrics in Vertex AI Monitoring
+    #
     # ==========================================================================
     main()
