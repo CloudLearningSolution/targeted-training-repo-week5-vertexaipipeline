@@ -298,7 +298,7 @@ def diabetes_training_pipeline(
     )
     
     # TODO: Uncomment and complete the train_task once you implement train_model_op
-    """
+    
     train_task = train_model_op(
         train_data=bq_train_task.outputs["destination_table"],
         reg_rate=reg_rate,
@@ -306,10 +306,10 @@ def diabetes_training_pipeline(
         bq_location=region
     ).set_cpu_limit("1").set_memory_limit("3840Mi")
     train_task.after(bq_train_task)
-    """
+    
     
     # TODO: Uncomment the evaluation task once train_task is implemented
-    """
+    
     eval_task = evaluate_model_op(
         test_data=bq_test_task.outputs["destination_table"],
         model=train_task.outputs["output_model"],
@@ -341,7 +341,7 @@ def diabetes_training_pipeline(
             min_accuracy=min_accuracy
         )
         rejected_task.after(eval_task)
-    """
+     
 
 # =============================================================================
 # (optional - for advanced users)
