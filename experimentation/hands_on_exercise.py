@@ -89,7 +89,7 @@ def evaluate_model_op(
 # =============================================================================
 # YOUR CODING Exam:
 # =============================================================================
-# HINT: The original train_model function signature was:
+# HINT: The original function signature was:
 # def train_model(reg_rate, X_train, X_test, y_train, y_test):
 
 # YOUR CODE HERE - Replace this comment block with your component:
