@@ -1,6 +1,8 @@
-# Customer Churn Prediction Model – Vertex AI
+# ML Model or Rules Engine Optimizer for Statistical Output CSV – Vertex AI Pipeline (MLOPS)
 
-## Table of Contents
+## Documentation and metadata: GitHub, Vertex pipeline, Cookbook
+## Governance compliance: Travis Allen
+## Contents Example
 
 1. Executive Summary
 2. Business Goal Identification
