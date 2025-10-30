@@ -85,7 +85,7 @@ def evaluate_model_op(
     metrics.log_metric("test_samples", len(test_df))
     
     return accuracy
-
+# # TODO: David Review In Progress...
 # =============================================================================
 # YOUR CODING Exam:
 # =============================================================================
