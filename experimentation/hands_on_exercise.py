@@ -207,8 +207,15 @@ def train_model_op(
         model_path,
         output_model.path
     )
-
-
+    # TODO: David feedback: Consider adding metrics for MLOPS
+    """
+    metrics.log_metric("training_accuracy", training_accuracy)
+    metrics.log_metric("regularization_rate", reg_rate)
+    metrics.log_metric("training_samples", len(train_df))
+    
+    logging.info("[CONVERSION] Model stored at %s", output_model.path)
+    return training_accuracy
+    """
 # Model approval components (already completed for you)
 @component(base_image=BASE_IMAGE)
 def model_approved_op(model_accuracy: float, model_name: str):
