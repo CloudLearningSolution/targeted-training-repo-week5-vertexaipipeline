@@ -85,7 +85,7 @@ def evaluate_model_op(
     metrics.log_metric("test_samples", len(test_df))
     
     return accuracy
-
+# # TODO: David Review In Progress
 # =============================================================================
 # YOUR CODING Exam:
 # =============================================================================
@@ -94,7 +94,10 @@ def evaluate_model_op(
 
 # YOUR CODE HERE - Replace this comment block with your component:
 
-
+def train_model_op(
+    train_data: Input[artifact_types.BQTable],
+    #TODO: Review the train_to_vertex_ai_conversion.py for answers
+)
 
 
 
