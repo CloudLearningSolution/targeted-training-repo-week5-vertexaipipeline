@@ -95,7 +95,16 @@ def evaluate_model_op(
 # YOUR CODE HERE - Replace this comment block with your component:
 
 
-
+from kfp import dsl, components
+from kfp.dsl import (
+    component,
+    pipeline,
+    Input,
+    Output,
+    Model,
+    Metrics
+)
+from google_cloud_pipeline_components.types import artifact_types
 
 
 
