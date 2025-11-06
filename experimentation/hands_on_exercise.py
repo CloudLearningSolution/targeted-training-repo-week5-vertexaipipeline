@@ -223,7 +223,7 @@ def diabetes_training_pipeline(
     )
     
     train_task = train_model_op(
-        train_data=,
+        train_data=bq_train_task.outputs["destination_table"],
         reg_rate=reg_rate,
         project_id=project_id,
         bq_location=region
@@ -231,7 +231,7 @@ def diabetes_training_pipeline(
     train_task.after(bq_train_task)
     
     eval_task = evaluate_model_op(
-        test_data=,
+        test_data=bq_test_task.outputs["destination_table"],
         model=train_task.outputs["output_model"],
         min_accuracy=min_accuracy,
         project_id=project_id,
