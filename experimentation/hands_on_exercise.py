@@ -19,6 +19,7 @@ from kfp.dsl import (
     Metrics
 )
 from google_cloud_pipeline_components.types import artifact_types
+from google_cloud_pipeline_components.bigquery import BigqueryQueryJobOp
 
 PIPELINE_NAME = "diabetes-classification-bigquery-exercise"
 BASE_IMAGE = "python:3.9"
@@ -54,7 +55,10 @@ def train_model_op(
     proj, dataset, table = match.groups()
     table_ref = f"{proj}.{dataset}.{table}"
     
-    train_df = 
+    # TODO: BigQuery load -> pandas DataFrame
+    client = bigquery.Client(project=project_id, location=bq_location)
+    query = f"SELECT * FROM `{table_ref}`"
+    train_df = client.query(query).result().to_dataframe(create_bqstorage_client=True)
     
     FEATURE_COLUMNS = ["Pregnancies","PlasmaGlucose","DiastolicBloodPressure",
                        "TricepsThickness","SerumInsulin","BMI","DiabetesPedigree","Age"]
@@ -70,11 +74,11 @@ def train_model_op(
     joblib.dump(model, model_path)
     shutil.copy(model_path, output_model.path)
     
-    metrics.log_metric("training_accuracy", training_accuracy)
-    metrics.log_metric("regularization_rate", reg_rate)
-    metrics.log_metric("training_samples", len(train_df))
+    metrics.log_metric("training_accuracy", float(training_accuracy))
+    metrics.log_metric("regularization_rate", float(reg_rate))
+    metrics.log_metric("training_samples", int(len(train_df)))
     
-    return training_accuracy
+    return float(training_accuracy)
 
 @component(
     base_image=BASE_IMAGE,
@@ -107,8 +111,10 @@ def evaluate_model_op(
     proj, dataset, table = match.groups()
     table_ref = f"{proj}.{dataset}.{table}"
 
+    # TODO: BigQuery load -> pandas DataFrame
+    client = bigquery.Client(project=project_id, location=bq_location)
     query = f"SELECT * FROM `{table_ref}`"
-    test_df = 
+    test_df = client.query(query).result().to_dataframe(create_bqstorage_client=True)
 
     model_obj = joblib.load(model.path)
     
@@ -120,10 +126,10 @@ def evaluate_model_op(
     preds = model_obj.predict(X_test)
     accuracy = accuracy_score(y_test, preds)
 
-    metrics.log_metric("accuracy", accuracy)
-    metrics.log_metric("test_samples", len(test_df))
+    metrics.log_metric("accuracy", float(accuracy))
+    metrics.log_metric("test_samples", int(len(test_df)))
     
-    return accuracy
+    return float(accuracy)
 
 @component(base_image=BASE_IMAGE)
 def model_approved_op(model_accuracy: float, model_name: str):
@@ -166,7 +172,7 @@ def register_model_op(
     if parent_model:
         upload_args["parent_model"] = parent_model
     
-    model = aiplatform.Model.upload(**upload_args)
+    _ = aiplatform.Model.upload(**upload_args)
 
 @dsl.pipeline(
     name=PIPELINE_NAME,
@@ -182,31 +188,80 @@ def diabetes_training_pipeline(
     min_accuracy: float = 0.70,
     parent_model: str = ""
 ):
-    train_query = 
+    # TODO: Write train/test SQL (deterministic split recommended)
+    source_ref = f"{project_id}.{bq_dataset}.{bq_view}"
+    train_query = f"""
+    SELECT *
+    FROM `{source_ref}`
+    WHERE MOD(
+      ABS(FARM_FINGERPRINT(
+        CAST(CONCAT(CAST(Pregnancies AS STRING),'-',CAST(PlasmaGlucose AS STRING)) AS STRING)
+      )),
+      10
+    ) < 8
+    """
+    test_query = f"""
+    SELECT *
+    FROM `{source_ref}`
+    WHERE MOD(
+      ABS(FARM_FINGERPRINT(
+        CAST(CONCAT(CAST(Pregnancies AS STRING),'-',CAST(PlasmaGlucose AS STRING)) AS STRING)
+      )),
+      10
+    ) >= 8
+    """
     
-    test_query = 
+    # TODO: Create BigQuery tasks that output BQTable artifacts
+    bq_train_task = BigqueryQueryJobOp(
+        project=project_id,
+        location=region,
+        query=train_query,
+        job_configuration_query={
+            "destinationTable": {
+                "projectId": project_id,
+                "datasetId": bq_dataset,
+                "tableId": "diabetes_train_tmp"
+            },
+            "writeDisposition": "WRITE_TRUNCATE",
+            "createDisposition": "CREATE_IF_NEEDED"
+        }
+    )
     
-    bq_train_task = 
+    bq_test_task = BigqueryQueryJobOp(
+        project=project_id,
+        location=region,
+        query=test_query,
+        job_configuration_query={
+            "destinationTable": {
+                "projectId": project_id,
+                "datasetId": bq_dataset,
+                "tableId": "diabetes_test_tmp"
+            },
+            "writeDisposition": "WRITE_TRUNCATE",
+            "createDisposition": "CREATE_IF_NEEDED"
+        }
+    )
     
-    bq_test_task = 
-    
+    # TODO: Wire training to BigQuery train output
     train_task = train_model_op(
-        train_data=,
+        train_data=bq_train_task.outputs["destination_table"],
         reg_rate=reg_rate,
         project_id=project_id,
         bq_location=region
     ).set_cpu_limit("1").set_memory_limit("3840Mi")
     train_task.after(bq_train_task)
     
+    # TODO: Wire evaluation to BigQuery test output and trained model
     eval_task = evaluate_model_op(
-        test_data=,
+        test_data=bq_test_task.outputs["destination_table"],
         model=train_task.outputs["output_model"],
         min_accuracy=min_accuracy,
         project_id=project_id,
         bq_location=region
     ).set_cpu_limit("1").set_memory_limit("3840Mi")
-    eval_task.after(train_task)
+    eval_task.after(train_task, bq_test_task)
     
+    # TODO: Add conditional gate for approval/rejection and optional registration
     with dsl.If(eval_task.outputs["Output"] >= min_accuracy, name="pass-accuracy-threshold"):
         approved_task = model_approved_op(
             model_accuracy=eval_task.outputs["Output"],
