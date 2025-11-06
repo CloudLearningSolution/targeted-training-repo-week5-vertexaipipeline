@@ -23,6 +23,12 @@ from google_cloud_pipeline_components.types import artifact_types
 PIPELINE_NAME = "diabetes-classification-bigquery-exercise"
 BASE_IMAGE = "python:3.9"
 
+bigquery_query_job_op = components.load_component_from_url(
+    'https://us-kfp.pkg.dev/ml-pipeline/google-cloud-registry/'
+    'bigquery-query-job/sha256:'
+    'd1cae80bc0de4e5b95b994739c8d0d7d42ce5a4cb17d3c9512eaed14540f6343'
+)
+
 @component(
     base_image=BASE_IMAGE,
     packages_to_install=[
@@ -52,9 +58,12 @@ def train_model_op(
     if not match:
         raise ValueError(f"Could not parse BQ table from URI: {uri}")
     proj, dataset, table = match.groups()
+
+    bq_client = bigquery.Client(project=project_id, location=bq_location)
     table_ref = f"{proj}.{dataset}.{table}"
-    
-    train_df = 
+    query = f"SELECT * FROM `{table_ref}`"
+    train_df = bq_client.query(query).to_dataframe()
+    logging.info("[CONVERSION] Loaded %d training rows from BigQuery", len(train_df))
     
     FEATURE_COLUMNS = ["Pregnancies","PlasmaGlucose","DiastolicBloodPressure",
                        "TricepsThickness","SerumInsulin","BMI","DiabetesPedigree","Age"]
@@ -107,8 +116,11 @@ def evaluate_model_op(
     proj, dataset, table = match.groups()
     table_ref = f"{proj}.{dataset}.{table}"
 
+    # Load test data from BigQuery
+    bq_client = bigquery.Client(project=project_id, location=bq_location)
     query = f"SELECT * FROM `{table_ref}`"
-    test_df = 
+    test_df = bq_client.query(query).to_dataframe()
+    logging.info("[CONVERSION] Loaded %d test rows from BigQuery", len(test_df))
 
     model_obj = joblib.load(model.path)
     
@@ -182,13 +194,33 @@ def diabetes_training_pipeline(
     min_accuracy: float = 0.70,
     parent_model: str = ""
 ):
-    train_query = 
-    
-    test_query = 
-    
-    bq_train_task = 
-    
-    bq_test_task = 
+    # Training data query (replaces get_csvs_df + train_test_split logic)
+    train_query = f"""
+        SELECT Pregnancies, PlasmaGlucose, DiastolicBloodPressure, TricepsThickness,
+               SerumInsulin, BMI, DiabetesPedigree, Age, Diabetic
+        FROM `{project_id}.{bq_dataset}.{bq_view}`
+        WHERE MOD(ABS(FARM_FINGERPRINT(CAST(CONCAT(Pregnancies, PlasmaGlucose) AS STRING))), 10) < 8
+        """
+
+    # Test data query (equivalent to test split)
+    test_query = f"""
+        SELECT Pregnancies, PlasmaGlucose, DiastolicBloodPressure, TricepsThickness,
+               SerumInsulin, BMI, DiabetesPedigree, Age, Diabetic
+        FROM `{project_id}.{bq_dataset}.{bq_view}`
+        WHERE MOD(ABS(FARM_FINGERPRINT(CAST(CONCAT(Pregnancies, PlasmaGlucose) AS STRING))), 10) >= 8
+        """
+
+    bq_train_task = bigquery_query_job_op(
+        project=project_id,
+        location=region,
+        query=train_query
+    )
+
+    bq_test_task = bigquery_query_job_op(
+        project=project_id,
+        location=region,
+        query=test_query
+    )
     
     train_task = train_model_op(
         train_data=,
