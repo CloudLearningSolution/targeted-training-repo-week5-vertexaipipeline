@@ -373,10 +373,10 @@ The learning doesn't stop after 16 weeks:
 - [ ] Install required tools and CLI utilities
 - [ ] Join targeted training Teams workspace
 - [ ] Introduce yourself to the community
-- [ ] Clone training repository and review Week 1 materials
-- [ ] Attend orientation session and meet your mentor
+- [ ] Clone training repository and review materials
+- [ ] Attend office hours sessions and meet your targeted training account managers
 - [ ] Set up local development environment
-- [ ] Complete pre-training assessment
+- [ ] Complete skills assessments
 
 **Ready to begin your ML migration journey? Let's build the future of ML engineering together!**
 
