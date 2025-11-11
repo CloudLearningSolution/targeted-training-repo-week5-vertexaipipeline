@@ -1,5 +1,5 @@
 """
-MLOps Template Components Pipeline Package
+MLOps Diabetes Prediction Pipeline Package
 ==========================================
 Vertex AI pipeline components and orchestration for diabetes prediction model.
 
