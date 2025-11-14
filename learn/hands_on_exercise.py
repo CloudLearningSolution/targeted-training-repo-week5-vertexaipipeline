@@ -1,5 +1,5 @@
 """
-Ready?
+From David: Good job
 
 Review train.py and train_to_vertex_ai_conversion.py files for patterns.
 
