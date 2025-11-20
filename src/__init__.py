@@ -1,15 +1,15 @@
 """
-MLOps Template Components Pipeline Package
+MLOps Template Pipeline Package
 ==========================================
-Vertex AI pipeline components and orchestration for diabetes prediction model.
+Vertex AI pipeline components and orchestration for Sysco models.
 
-This package contains:
+This template package contains:
 - Pipeline definitions (dev and prod)
 - Pipeline compiler
 - Pipeline execution scripts
-- Reusable components (custom and pre-built)
+- Template components (custom and pre-built)
 
-Package Structure:
+Template Package Structure:
     src/
     ├── __init__.py (this file)
     ├── compiler.py

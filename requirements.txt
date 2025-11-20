@@ -1,4 +1,3 @@
-pytest==7.1.2
-mlflow>=2.0.0
-pandas==1.4.3
-scikit-learn==1.1.1
+# This file points to the actual requirements in src/
+# All dependencies are managed in src/requirements.txt
+-r src/requirements.txt
