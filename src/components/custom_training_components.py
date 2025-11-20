@@ -22,3 +22,8 @@ Usage:
         env_prefix="[DEV]"
     )
 """
+# Planning DEMO
+# S3 logic
+# S3 information
+# Libraries lab 6.1.1 in the model.py
+
