@@ -30,3 +30,10 @@ def _read_from_redshift(sql_client, sql: str, params: dict = None, chunksize: Op
         LOG.exception("Redshift read failed; returning empty DataFrame for lab fallback")
         df = pd.DataFrame()
     return df
+
+# Intermediate solution. Considering Prebuilt or Custom components
+     #* WHERE: stage_table_to_s3() in ingest_model.py
+     #* WHAT: Inspect UNLOAD vs client-side upload patterns
+     #* WHY: Efficiency vs cost trade-offs in Redshift
+     #* Migration Planning: Replace with BigQuery export jobs inside
+     #  prebuilt_bigquery_components.py or custom_data_quality_components.py.
