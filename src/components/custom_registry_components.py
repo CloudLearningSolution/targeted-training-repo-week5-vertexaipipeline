@@ -21,3 +21,6 @@ Usage:
         env_prefix="[PROD]"
     )
 """
+     * WHAT: Inspect boto3.upload_file usage
+     * WHY: Durable storage pattern in AWS
+     * Migration Planning: Replace with GCS client logic inside a
